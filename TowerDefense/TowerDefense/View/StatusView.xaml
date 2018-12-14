@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TowerDefense.StatusView"
+             xmlns:Converters="clr-namespace:TowerDefense.Converters"
+             xmlns:controls="clr-namespace:TowerDefense">
+    <Frame x:Name="ExpandablePanel" HasShadow="True" Padding="0">
+        <StackLayout Orientation="Vertical" Spacing="0">
+            <StackLayout Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="0" Padding="0, 3">
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="MovePanel_Tapped"/>
+                </StackLayout.GestureRecognizers>
+                <Image HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
+                    <Image.Triggers>
+                        <DataTrigger TargetType="Image" Binding="{Binding IsExpanded}" Value="true">
+                            <Setter Property="Source" Value="down_icon.png" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Image" Binding="{Binding IsExpanded}" Value="false">
+                            <Setter Property="Source" Value="up_icon.png" />
+                        </DataTrigger>
+                    </Image.Triggers>
+                </Image>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" VerticalOptions="StartAndExpand">
+                    <ActivityIndicator HeightRequest="5" IsRunning="False" />
+                    <Label Text="No bluetooth connectivity">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="true">
+                                <Setter Property="Text" Value="Bluetooth is connected" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="false">
+                                <Setter Property="Text" Value="No bluetooth connectivity" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <ActivityIndicator HeightRequest="5" Color="Gray" IsRunning="{Binding Bluetooth.IsBTConnected, Converter={Converters:InverseBoolConverter}}" />
+                </StackLayout>
+            </StackLayout>
+            <StackLayout x:Name="ExpandedLayout" Orientation="Vertical" VerticalOptions="CenterAndExpand" Padding="25, 35, 25, 10">
+                <Button Text="START GAME" BackgroundColor="LightSeaGreen" TextColor="White" Clicked="GameStart_Clicked" IsEnabled="{Binding Bluetooth.IsBTConnected}" IsVisible="{Binding GameStats.IsGameStarted, Converter={Converters:InverseBoolConverter}}" />
+                <Button Text="END GAME" BackgroundColor="IndianRed" TextColor="White" Clicked="GameEnd_Clicked" IsVisible="{Binding GameStats.IsGameStarted}" />
+                <controls:HighScoresView x:Name ="HighScores" Margin="0, 15"/>
+            </StackLayout>
+        </StackLayout>
+    </Frame>
+</ContentView>
