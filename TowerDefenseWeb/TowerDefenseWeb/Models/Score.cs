@@ -9,9 +9,11 @@
 
 namespace TowerDefenseWeb.Models
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Runtime.Serialization;
 
     public partial class Score
     {
@@ -20,5 +22,9 @@ namespace TowerDefenseWeb.Models
         public string Name { get; set; }
         public int Value { get; set; }
         public System.DateTime Date { get; set; }
+
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public virtual Player Player { get; set; }
     }
 }

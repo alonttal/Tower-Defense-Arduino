@@ -7,6 +7,8 @@ namespace TowerDefense
 {
     public class GameStats : INotifyPropertyChanged
     {
+        // operations on 32-bit values are atomic in C#
+        private readonly Object _lockObj = new Object();
         private int _coins = 0;
         public int Coins {
             get {
@@ -44,24 +46,19 @@ namespace TowerDefense
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGameStarted)));
             }
         }
-        private string _playerName = "Anonymous";
-        public string PlayerName
-        {
-            get
-            {
-                return _playerName;
-            }
-            set
-            {
-                _playerName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayerName)));
-            }
-        }
 
         public void ResetStats()
         {
             Coins = 100;
             Score = 12;
+        }
+
+        public void AtomicIncrementCoins(int value)
+        {
+            lock (_lockObj)
+            {
+                Coins += value;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

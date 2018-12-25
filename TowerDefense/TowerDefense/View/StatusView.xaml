@@ -20,22 +20,28 @@
                         </DataTrigger>
                     </Image.Triggers>
                 </Image>
-                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" VerticalOptions="StartAndExpand">
-                    <ActivityIndicator HeightRequest="5" IsRunning="False" />
-                    <Label Text="No bluetooth connectivity">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="true">
-                                <Setter Property="Text" Value="Bluetooth is connected" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="false">
-                                <Setter Property="Text" Value="No bluetooth connectivity" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-                    <ActivityIndicator HeightRequest="5" Color="Gray" IsRunning="{Binding Bluetooth.IsBTConnected, Converter={Converters:InverseBoolConverter}}" />
+                <StackLayout Orientation="Horizontal" Padding="25, 0">
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Center" Spacing="1">
+                        <Image Source="bluetooth.png" IsVisible="{Binding Bluetooth.IsBTConnected}" Margin="12, 0, 12, 0"/>
+                        <ActivityIndicator HeightRequest="5" Color="Gray" IsVisible="{Binding Bluetooth.IsBTConnected, Converter={Converters:InverseBoolConverter}}" IsRunning="{Binding Bluetooth.IsBTConnected, Converter={Converters:InverseBoolConverter}}" />
+                        <Label>
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="true">
+                                    <Setter Property="Text" Value="Bluetooth connected" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Bluetooth.IsBTConnected}" Value="false">
+                                    <Setter Property="Text" Value="Connecting bluetooth" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" VerticalOptions="CenterAndExpand" Spacing="1">
+                        <Button Image="settings.png" HorizontalOptions="End" BackgroundColor="Transparent" WidthRequest="50" Padding="0" Margin="0" Clicked="OnSettings_Clicked"/>
+                    </StackLayout>
                 </StackLayout>
             </StackLayout>
-            <StackLayout x:Name="ExpandedLayout" Orientation="Vertical" VerticalOptions="CenterAndExpand" Padding="25, 35, 25, 10">
+            <BoxView HeightRequest="1" WidthRequest="1" BackgroundColor="WhiteSmoke"/>
+            <StackLayout x:Name="ExpandedLayout" Orientation="Vertical" VerticalOptions="CenterAndExpand" Padding="25, 25, 25, 10">
                 <Button Text="START GAME" BackgroundColor="LightSeaGreen" TextColor="White" Clicked="GameStart_Clicked" IsEnabled="{Binding Bluetooth.IsBTConnected}" IsVisible="{Binding GameStats.IsGameStarted, Converter={Converters:InverseBoolConverter}}" />
                 <Button Text="END GAME" BackgroundColor="IndianRed" TextColor="White" Clicked="GameEnd_Clicked" IsVisible="{Binding GameStats.IsGameStarted}" />
                 <controls:HighScoresView x:Name ="HighScores" Margin="0, 15"/>

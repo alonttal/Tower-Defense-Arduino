@@ -15,24 +15,26 @@ namespace TowerDefense
         public bool IsExpanded { get; set; } = true;
 
         public GameStats GameStats { get; set; }
+        public PlayerManager PlayerManager { get; }
         public BluetoothService Bluetooth { get; set; }
 
-        public StatusView(BluetoothService bluetooth, GameStats gameStats)
+        public StatusView(BluetoothService bluetooth, GameStats gameStats, PlayerManager playerManager)
         {
             InitializeComponent();
 
-            this.GameStats = gameStats;
             this.Bluetooth = bluetooth;
+            this.GameStats = gameStats;
+            this.PlayerManager = playerManager;
 
             Bluetooth.TrackBluetoothConnectionStatus();
 
             BindingContext = this;
         }
 
-        public void UpdateTableScore(Score score)
+        public void UpdateTableScore(HighScore score)
         {
             if (score.Value > 0)
-                HighScores.ScoresTable.PublishScore(score);
+                HighScores.ScoresTable.PublishScore(score, PlayerManager.Player.Token);
         }
 
         private void MovePanel()
@@ -66,6 +68,11 @@ namespace TowerDefense
         private void GameEnd_Clicked(object sender, EventArgs e)
         {
             EndGameEvent?.Invoke(this, null);
+        }
+
+        private void OnSettings_Clicked(object sender, EventArgs e)
+        {
+            Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(PlayerManager));
         }
     }
 }

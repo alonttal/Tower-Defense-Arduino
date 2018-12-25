@@ -117,7 +117,8 @@ namespace TowerDefense.Droid
             try
             {
                 BufferedReader buffer = new BufferedReader(_readerBuffer);
-                if (buffer.Ready()) data = buffer.ReadLine();
+                //if (buffer.Ready()) 
+                data = buffer.ReadLine();
             }
             catch (Exception e)
             {

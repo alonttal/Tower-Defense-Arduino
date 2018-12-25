@@ -14,24 +14,24 @@ namespace TowerDefense
     {
 
         public int ScoresTableSize = Constants.Constants.ScoresTableSize;
-        public ScoresTable ScoresTable { get; set; }
+        public HighScoresManager ScoresTable { get; set; }
 
         public HighScoresView()
         {
             InitializeComponent();
-            ScoresTable = new ScoresTable(ScoresTableSize);
+            ScoresTable = new HighScoresManager(ScoresTableSize);
 
             StackLayout HighscoresLayout = new StackLayout
             {
                 Orientation = StackOrientation.Vertical,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
             };
-            HighscoresLayout.Children.Add(new Label { Text = "Highscores:", FontAttributes = FontAttributes.Bold, FontSize = 15 });
+            HighscoresLayout.Children.Add(new Label { Text = "Hall of Fame:", FontAttributes = FontAttributes.Bold, FontSize = 15 });
 
             StackLayout ScoresTableLayout = new StackLayout();
             ScoresTableLayout.HorizontalOptions = LayoutOptions.CenterAndExpand;
             int scoreNumber = 1;
-            foreach (Score score in ScoresTable.Scores)
+            foreach (HighScore score in ScoresTable.Scores)
             {
                 Image crownImage = new Image();
                 crownImage.HorizontalOptions = LayoutOptions.CenterAndExpand;

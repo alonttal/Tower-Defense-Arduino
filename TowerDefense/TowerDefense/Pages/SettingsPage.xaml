@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:Converters="clr-namespace:TowerDefense.Converters"
+             x:Class="TowerDefense.SettingsPage">
+    <ScrollView>
+        <StackLayout Orientation="Vertical">
+            <StackLayout>
+                <StackLayout Orientation="Vertical" Padding="15">
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="You are connected as: " FontSize="15" />
+                        <Label Text="{Binding PlayerManager.Player.Name}" FontSize="15" FontAttributes="Bold" TextColor="Goldenrod"/>
+                    </StackLayout>
+                </StackLayout>
+                <BoxView HeightRequest="1" WidthRequest="1" BackgroundColor="LightGray"/>
+                <StackLayout IsVisible="{Binding PlayerManager.IsConnected, Converter={Converters:InverseBoolConverter}}">
+                    <StackLayout Orientation="Vertical" Padding="15">
+                        <StackLayout Orientation="Horizontal" Padding="0" Margin="0" Spacing="5">
+                            <Image Source="connect_icon" VerticalOptions="CenterAndExpand" />
+                            <Label Text="Connect" VerticalOptions="CenterAndExpand" FontSize="15" FontAttributes="Bold" />
+                        </StackLayout>
+                        <Label Text="What is your name my lord?" />
+                        <Entry x:Name="LoginNameEntry" Placeholder="Name" />
+                        <Label Text="Do you have your secret password? I promise to not tell anyone" />
+                        <Entry x:Name="LoginPasswordEntry" Placeholder="Password" IsPassword="true" />
+                        <Button BackgroundColor="LightSeaGreen" Clicked="OnConnect_Clicked" IsEnabled="{Binding IsLoggingIn, Converter={Converters:InverseBoolConverter}}" >
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsLoggingIn}" Value="false">
+                                    <Setter Property="Text" Value="Connect" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsLoggingIn}" Value="true">
+                                    <Setter Property="Text" Value="Connecting... Please wait" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+                    <BoxView HeightRequest="1" WidthRequest="1" BackgroundColor="LightGray"/>
+                    <StackLayout  Orientation="Vertical" Padding="15, 15, 15, 0">
+                        <StackLayout Orientation="Horizontal" Padding="0" Margin="0" Spacing="5">
+                            <Image Source="regiter_icon.png" VerticalOptions="CenterAndExpand" />
+                            <Label Text="Register" FontSize="15" FontAttributes="Bold" VerticalOptions="CenterAndExpand" />
+                        </StackLayout>
+                        <Label Text="Please tell me your name my lord" />
+                        <Label Text="Name cannot be longer than 10 characters" Margin="0" FontSize="8"/>
+                        <Entry x:Name="RegisterNameEntry" Placeholder="Name" />
+                        <Label Text="I will also need a secret password for that" />
+                        <Label Text="Password must be at least 6 characters" Margin="0" FontSize="8"/>
+                        <Entry x:Name="RegisterPasswordEntry" Placeholder="Password" IsPassword="true" />
+                        <Button BackgroundColor="SteelBlue" Clicked="OnRegister_Clicked" IsEnabled="{Binding IsRegistering, Converter={Converters:InverseBoolConverter}}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsRegistering}" Value="false">
+                                    <Setter Property="Text" Value="Register" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsRegistering}" Value="true">
+                                    <Setter Property="Text" Value="Registering... Please wait" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+                </StackLayout>
+                <StackLayout Orientation="Vertical" Padding="15" IsVisible="{Binding PlayerManager.IsConnected}">
+                    <Button Text="Disconnect" BackgroundColor="IndianRed" Clicked="OnDisconnect_Clicked" />
+                </StackLayout>
+            </StackLayout>
+            <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Spacing="0">
+                <Image Source="orc.png" />
+            </StackLayout>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

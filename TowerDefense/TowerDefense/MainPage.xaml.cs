@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TowerDefense.Logic;
+using TowerDefense.Managers;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,6 +16,9 @@ namespace TowerDefense
     {
         BluetoothService BluetoothService = new BluetoothService("TowerDefense");
         GameStats GameStats = new GameStats();
+        Player Player = new Player();
+        PlayerManager PlayerManager;
+        BluetoothGameManager BluetoothGameManager;
 
         GameStatsView gameStatsView;
         TowerListView towerListView;
@@ -22,9 +27,15 @@ namespace TowerDefense
         public MainPage()
         {
             InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
+
+            PlayerManager = new PlayerManager(Player);
+            PlayerManager.InitPlayer();
+            BluetoothGameManager = new BluetoothGameManager(BluetoothService, GameStats);
+
             gameStatsView = new GameStatsView(GameStats);
             towerListView = new TowerListView(TryToUpgradeTowerEventHandler);
-            statusView = new StatusView(BluetoothService, GameStats);
+            statusView = new StatusView(BluetoothService, GameStats, PlayerManager);
 
             statusView.StartGameEvent += StartGameEventHandler;
             statusView.EndGameEvent += EndGameEventHandler;
@@ -42,7 +53,7 @@ namespace TowerDefense
             Tower tower = ((TowerView)sender).Tower;
             if (GameStats.Coins >= tower.NextLevelPrice)
             {
-                GameStats.Coins -= tower.NextLevelPrice;
+                GameStats.AtomicIncrementCoins(-tower.NextLevelPrice);
                 tower.LevelUp();
                 BluetoothService.Bluetooth.Write(tower.ID.ToString());
             }
@@ -54,15 +65,15 @@ namespace TowerDefense
             System.Diagnostics.Debug.WriteLine("Starting game.");
             GameStats.ResetStats();
             towerListView.ResetTowers();
-            BluetoothService.Bluetooth.Write("s");
+            BluetoothGameManager.SendStartGame();
             GameStats.IsGameStarted = true;
         }
 
         public void EndGameEventHandler(object sender, EventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("Ending game.");
-            BluetoothService.Bluetooth.Write("e");
-            statusView.UpdateTableScore(new Logic.Score { Name = GameStats.PlayerName, Value = GameStats.Score, Date = DateTime.Now });
+            BluetoothGameManager.SendEndGame();
+            statusView.UpdateTableScore(new HighScore { Name = Player.Name, Value = GameStats.Score, Date = DateTime.Now });
             GameStats.IsGameStarted = false;
         }
 
