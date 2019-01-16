@@ -9,5 +9,7 @@ TowerDefenseWeb/TowerDefenseWeb/packages
 TowerDefenseWeb/TowerDefenseWeb/bin
 TowerDefenseWeb/TowerDefenseWeb/obj
 TowerDefenseWeb/TowerDefenseWeb/Web.config
+TowerDefenseWeb/TowerDefenseWeb/Web.Debug.config
+TowerDefenseWeb/TowerDefenseWeb/Web.Release.config
 .vs
 

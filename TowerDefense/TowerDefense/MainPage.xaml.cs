@@ -65,20 +65,26 @@ namespace TowerDefense
 
         public void StartGameEventHandler(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Starting game.");
-            GameStats.ResetStats();
-            towerListView.ResetTowers();
-            BluetoothGameManager.SendStartGame();
-            GameStats.IsGameStarted = true;
+            if (!GameStats.IsGameStarted)
+            {
+                System.Diagnostics.Debug.WriteLine("Starting game.");
+                GameStats.IsGameStarted = true;
+                GameStats.ResetStats();
+                towerListView.ResetTowers();
+                BluetoothGameManager.SendStartGame();
+            }
         }
 
         public void EndGameEventHandler(object sender, Boolean sendEndGame)
         {
-            System.Diagnostics.Debug.WriteLine("Ending game.");
-            if (sendEndGame) BluetoothGameManager.SendEndGame();
-            statusView.UpdateTableScore(new HighScore { Name = Player.Name, Value = GameStats.Score, Date = DateTime.Now });
-            GameStats.IsGameStarted = false;
-            statusView.ExpandPanel();
+            if (GameStats.IsGameStarted)
+            {
+                System.Diagnostics.Debug.WriteLine("Ending game.");
+                GameStats.IsGameStarted = false;
+                if (sendEndGame) BluetoothGameManager.SendEndGame();
+                statusView.UpdateTableScore(new HighScore { Name = Player.Name, Value = GameStats.Score, Date = DateTime.Now });
+                statusView.ExpandPanel();
+            }
         }
     }
 }

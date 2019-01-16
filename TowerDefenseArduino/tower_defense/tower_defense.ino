@@ -286,7 +286,7 @@ void move_leds() {
             life--;
             lcd_print_score_and_life();
             if (life == 0) {
-                end_game();
+                end_game(true);
             }
         } for (uint16_t j = LED_STRIP_NUM_LEDS - 1; j > 0; j--) {
             leds_max_hp[j] = leds_max_hp[j - 1];
@@ -440,7 +440,7 @@ void check_bluetooth_messages() {
     while (BT.available()) {
         char message = BT.read();
         if (message == END_MESSAGE) {
-          end_game();
+          end_game(false);
         } else if ((uint8_t)(message - '0') < TOWERS_NUM) {
           // expecting to receive the tower number that leveled up
           uint8_t tower_num = message - 48;
@@ -482,9 +482,9 @@ void start_game() {
     delay(START_GAME_DELAY);
 }
 
-void end_game() {
+void end_game(bool send_end_game) {
     game_started = false;
-    BT.println(END_MESSAGE);
+    if (send_end_game) BT.println(END_MESSAGE);
     init_bluetooth();
     delay(END_GAME_DELAY);
 }
