@@ -49,8 +49,8 @@ namespace TowerDefense
 
         public void ResetStats()
         {
-            Coins = 100;
-            Score = 12;
+            Coins = 0;
+            Score = 0;
         }
 
         public void AtomicIncrementCoins(int value)

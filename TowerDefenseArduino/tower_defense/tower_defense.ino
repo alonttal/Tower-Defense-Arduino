@@ -10,6 +10,8 @@
 // --------------------
 #define PRE_SETUP_DELAY 100
 #define POST_SETUP_DELAY 1000
+#define START_GAME_DELAY 1000
+#define END_GAME_DELAY 500
 #define ON HIGH
 #define OFF LOW
 #define BAUD_RATE 9600
@@ -31,7 +33,7 @@ bool game_started = false;
 // --------------------
 // LED Strip Configurations
 // --------------------
-#define LED_STRIP_DATA_PIN 13
+#define LED_STRIP_DATA_PIN 40
 // 60 leds per meter, 5 meters => 60*5=300 LEDS
 #define LED_STRIP_NUM_LEDS 95
 #define LED_STRIP_MODEL WS2812B
@@ -40,12 +42,13 @@ bool game_started = false;
 // green -> red thus, we need to set up the color ordering so that red -> red
 // and green -> green
 #define LED_STRIP_COLOR_ORDER GRB
-#define LED_STRIP_SPEED 300
+#define LED_STRIP_SPEED 250
+#define MAX_LEDS_TO_ADD 30
 CRGB leds[LED_STRIP_NUM_LEDS];
-uint8_t leds_hp[LED_STRIP_NUM_LEDS] = {0};
-uint8_t leds_max_hp[LED_STRIP_NUM_LEDS] = {20};
+int16_t leds_hp[LED_STRIP_NUM_LEDS] = {0};
+int16_t leds_max_hp[LED_STRIP_NUM_LEDS] = {20};
 uint16_t leds_to_add = 0;
-uint8_t current_max_hp = 0;
+int16_t current_max_hp = 0;
 unsigned long led_strip_last_move_time = 0;
 
 // --------------------
@@ -85,7 +88,7 @@ unsigned long led_strip_last_move_time = 0;
 #define RED_LED_PIN_8 36
 #define RED_LED_PIN_9 38
 #define RFID_SAMPLE_SPEED 300
-#define RANGES_NUM 8
+#define RANGES_NUM 4
 RFID1 rfid;
 uchar rfid_miso_pins[] = {RFID_MISO_PIN_1, RFID_MISO_PIN_2, RFID_MISO_PIN_3,
                           RFID_MISO_PIN_4, RFID_MISO_PIN_5, RFID_MISO_PIN_6,
@@ -103,15 +106,15 @@ uint16_t shoot_damage[RFIDS_NUM] = {0};
 uint8_t rfid_green_led_status[RFIDS_NUM] = {0};
 uint8_t rfid_red_led_status[RFIDS_NUM] = {0};
 // each rfid can have up to 4 different ranges (specifying all its directions)
-const int16_t rfids_ranges[][RANGES_NUM] = {{0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1},
-                                            {0, 9, -1, -1, -1, -1, -1, -1}};
+const int16_t rfids_ranges[][RANGES_NUM] = {{0, 13, -1, -1},
+                                            {19, 27, -1, -1},
+                                            {27, 35, 72, 79},
+                                            {38, 46, -1, -1},
+                                            {48, 54, -1, -1},
+                                            {36, 69, -1, -1},
+                                            {57, 66, -1, -1},
+                                            {67, 83, -1, -1},
+                                            {84, 91, -1, -1}};
 
 // --------------------
 // LCD Screen Configurations
@@ -137,14 +140,14 @@ SoftwareSerial BT(RX_PIN, TX_PIN);
 // Towers Configurations
 // --------------------
 #define TOWERS_NUM 6
-const uint32_t tower_ids[] = {0x7012E4A4, 0xBC49C873, 0x345E64A3, 0xE1E663A3, 0xC4D863A3, 0xDA1466A3};
-// 0x9D7650D3
-uint8_t tower_levels[TOWERS_NUM] = {1};
+const uint32_t tower_ids[] = {0x9D7650D3, 0xDA1466A3, 0xC4D863A3, 0x345E64A3, 0xE1E663A3, 0xBC49C873};
+// 0x7012E4A4
+uint8_t tower_levels[TOWERS_NUM] = {0};
 uint8_t tower_extra_ranges[] = {0, 0, 0, 0, 0, 0};
-uint16_t tower_speeds[] = {500, 500, 500, 600, 300, 700};  // higher is slower
-uint8_t tower_bonus_speeds[] = {0, 1, 3, 1, 2, 1};
+uint16_t tower_speeds[] = {500, 700, 900, 1100, 1300, 1500};  // higher is slower
+uint8_t tower_bonus_speeds[] = {0, 1, 2, 3, 4, 5};
 uint16_t tower_damages[] = {1, 1, 1, 1, 1, 1};
-uint8_t tower_bonus_damage[] = {3, 2, 1, 2, 1, 3};
+uint8_t tower_bonus_damage[] = {1, 2, 3, 4, 5, 6};
 // --------------------
 //        Inits
 // --------------------
@@ -155,7 +158,7 @@ void init_led_strip() {
     FastLED.setBrightness(LED_STRIP_BRIGHTNESS);
     FastLED.clear();
     FastLED.show();
-    //flash_lead_strips();
+    flash_led_strip();
     Serial.println("Done");
 }
 
@@ -186,7 +189,7 @@ void init_bluetooth() {
 }
 
 /////////////////////////////////////////////////////////////
-void flash_lead_strips() {
+void flash_led_strip() {
   for (uint16_t j = 0; j < LED_STRIP_NUM_LEDS; j++) {
       leds[j] = CRGB::Blue;
       FastLED.show();
@@ -195,6 +198,20 @@ void flash_lead_strips() {
     delay(3000);
     FastLED.clear();
     FastLED.show();
+}
+
+void fadeall() { for(int i = 0; i < LED_STRIP_NUM_LEDS; i++) { leds[i].nscale8(250); } }
+
+void cyclon_led_strip() {
+  static uint8_t hue = 0;
+  static int i = 0;
+  static int inc = 1;
+  leds[i] = CHSV(hue++, 255, 255);
+  FastLED.show(); 
+  fadeall();
+  i += inc;
+  if (i == LED_STRIP_NUM_LEDS || i < 0) inc = -inc;
+  delay(10);
 }
 
 void flash_rfid_leds() {
@@ -236,6 +253,9 @@ void lcd_print_score_and_life() {
     lcd.print(SCORE_MSG(score));
     lcd.setCursor(13, 1);
     lcd.write(byte(HEART));
+    if (life < 10) {
+      lcd.print("0");
+    }
     lcd.print(life);
 }
 
@@ -262,12 +282,11 @@ struct CRGB get_hp_color(uint8_t led_index) {
 void move_leds() {
     VIRTUAL_DELAY(
         led_strip_last_move_time, LED_STRIP_SPEED,
-        if (leds_max_hp[LED_STRIP_NUM_LEDS - 1] > 0) {
+        if (leds_hp[LED_STRIP_NUM_LEDS - 1] > 0) {
             life--;
             lcd_print_score_and_life();
             if (life == 0) {
                 end_game();
-                return;
             }
         } for (uint16_t j = LED_STRIP_NUM_LEDS - 1; j > 0; j--) {
             leds_max_hp[j] = leds_max_hp[j - 1];
@@ -284,38 +303,6 @@ void move_leds() {
             leds[0] = CRGB::Black;
         } FastLED.show(););
 }
-
-// void read_rfid(uint8_t rfid_index) {
-//     uint8_t i = rfid_index;
-//     rfids[i].PICC_ReadCardSerial();
-//     Serial.println("RFID number " + String(i) + " is reading.");
-//     Serial.print(F("PICC type: "));
-//     MFRC522::PICC_Type piccType = rfids[i].PICC_GetType(rfids[i].uid.sak);
-//     Serial.println(rfids[i].PICC_GetTypeName(piccType));
-
-//     unsigned long int uid = 0;
-//     Serial.print(F("Scanned PICC's UID: "));
-//     for (int j = 0; j < rfids[i].uid.size; j++) {
-//         uid = (uid << 8) + rfids[i].uid.uidByte[j];
-//     }
-//     Serial.println(uid, HEX);
-// }
-
-// void track_rfid_card(uint8_t rfid_index) {
-//     const uint8_t i = rfid_index;
-//     VIRTUAL_DELAY(
-//         rfid_last_sample_time[i], RFID_SAMPLE_SPEED,
-// //        rfids[i].PICC_Select();
-//         if (rfids[i].PICC_ReadCardSerial() || rfids[i].PICC_IsNewCardPresent()) {
-//             read_rfid(i);
-//             shoot_speeds[i] = 100; // for now hard coded (should be set according to the rfid card placed)
-//             toggle_green_led(i, ON);
-//         } else {
-//             shoot_speeds[i] = 0;
-//             toggle_green_led(i, OFF);
-//             toggle_red_led(i, OFF);
-//         });
-// }
 
 void enable_tower(uint8_t rfid_index, int8_t tower_num) {
   shoot_speeds[rfid_index] = tower_speeds[tower_num] - tower_bonus_speeds[tower_num] * tower_levels[tower_num];
@@ -401,10 +388,10 @@ void try_to_shoot(uint8_t rfid_index) {
                 if (leds_hp[shoot_index] > 0) {
                     toggle_red_led(i, ON);
                     leds_hp[shoot_index] -= shoot_damage[i];  // this needs to be decreased according to tower's damage
-                    Serial.println("Shooting index: " + String(shoot_index) + " HP droped: " + String(leds_hp[shoot_index] + 1) + " -> " + String(leds_hp[shoot_index]));
+                    Serial.println("Shooting index: " + String(shoot_index) + " HP droped: " + String(leds_hp[shoot_index] + shoot_damage[i]) + " -> " + String(leds_hp[shoot_index]));
                     leds[shoot_index] = get_hp_color(shoot_index);
                     FastLED.show();
-                    if (leds_hp[shoot_index] == 0) {
+                    if (leds_hp[shoot_index] <= 0) {
                         update_score();
                     }
                     found_target = true;
@@ -425,17 +412,19 @@ void next_level() {
     Serial.println("Starting level " + String(level));
     lcd_print_level();
     current_max_hp = level + 4;
-    leds_to_add = level + 4;
+    leds_to_add = leds_to_add < MAX_LEDS_TO_ADD ? level + 4 : leds_to_add;
 }
 
 void next_level_loop() {
     VIRTUAL_DELAY(level_start_time, next_level_delay,
                   next_level();
-                  next_level_delay = (level + 100) * LED_STRIP_SPEED;  // for now some boring delay
+                  int new_led_strip_speed = 100 * LED_STRIP_SPEED - ((level - 1) / 2) * 10;
+                  next_level_delay = new_led_strip_speed < LED_STRIP_SPEED << 1 ? LED_STRIP_SPEED << 1 : new_led_strip_speed;
     );
 }
 
 void wait_for_bt_connection() {
+    Serial.println("Waiting for bluetooth connection...");
     while (true) {
         if (BT.available()) {
             if (BT.read() == START_MESSAGE) {
@@ -443,6 +432,7 @@ void wait_for_bt_connection() {
                 break;
             }
         }
+        cyclon_led_strip();
     }
 }
 
@@ -464,32 +454,62 @@ void send_score() {
     BT.println(score);
 }
 
+void start_game() {
+    FastLED.clear();
+    FastLED.show();
+    for (int i = 0; i < LED_STRIP_NUM_LEDS; i++) leds_hp[i] = 0;
+    for (int i = 0; i < RFIDS_NUM; i++) {
+        rfid_last_sample_time[i] = 0;
+        rfid_last_shoot_time[i] = 0;
+        shoot_speeds[i] = 0;
+        shoot_damage[i] = 0;
+        rfid_green_led_status[i] = 0;
+        rfid_red_led_status[i] = 0;
+    }
+    for (int i = 0; i < TOWERS_NUM; i++) {
+        tower_levels[i] = 0;
+    }
+    life = 50;
+    level = 0;
+    score = 0;
+    level_start_time = 0;
+    next_level_delay = 0;
+    leds_to_add = 0;
+    current_max_hp = 0;
+    led_strip_last_move_time = 0;
+    game_started = true;
+    Serial.println("Starting game!");
+    delay(START_GAME_DELAY);
+}
+
 void end_game() {
     game_started = false;
     BT.println(END_MESSAGE);
+    init_bluetooth();
+    delay(END_GAME_DELAY);
 }
 
 void setup() {
     delay(PRE_SETUP_DELAY);
     Serial.begin(BAUD_RATE);
     init_led_strip();
-    //init_rfids();
-    //init_lcd_display();
-    //init_bluetooth();
+    init_rfids();
+    init_lcd_display();
+    init_bluetooth();
     Serial.println("Finished initialization.");
     delay(POST_SETUP_DELAY);
-    Serial.println("Starting game!");
+    Serial.println("Finished initialization game!");
 }
 
 void loop() {
     if (!game_started) {
-        //wait_for_bt_connection();
-        game_started = true;
+        wait_for_bt_connection();
+        start_game();
     } else {
         next_level_loop();
         track_rfid_cards_loop();
         move_leds();
         try_to_shoot_loop();
-        //check_bluetooth_messages();
+        check_bluetooth_messages();
     }
 }

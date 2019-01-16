@@ -1,28 +1,45 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TowerDefense.TowerView">
+             x:Class="TowerDefense.TowerView"
+             xmlns:Converters="clr-namespace:TowerDefense.Converters">
     <Frame Padding="0" CornerRadius="5">
         <StackLayout Orientation="Horizontal" BackgroundColor="WhiteSmoke" Padding="5, 10">
             <StackLayout.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnTapped"></TapGestureRecognizer>
+                    <TapGestureRecognizer Tapped="OnTapped"></TapGestureRecognizer>
+                    <SwipeGestureRecognizer Direction="Left,Right" Swiped="OnSwiped"/>
             </StackLayout.GestureRecognizers>
             <Image Source="{Binding Tower.Image}" Margin="5,0" HeightRequest="100" WidthRequest="100"/>
-            <StackLayout Orientation="Vertical" VerticalOptions="Center">
-
-                <StackLayout Orientation="Vertical">
-                    <Label Text="Level" TextColor="Black"></Label>
+            <StackLayout Orientation="Horizontal" Padding="0" Margin="0" IsVisible="{Binding ShowStats, Converter={Converters:InverseBoolConverter}}" HorizontalOptions="FillAndExpand">
+                <StackLayout Orientation="Vertical" VerticalOptions="Center">
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="Level" TextColor="Black"></Label>
+                    </StackLayout>
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="Next Level Price" TextColor="Black"></Label>
+                    </StackLayout>
                 </StackLayout>
-                <StackLayout Orientation="Vertical">
-                    <Label Text="Next Level Price" TextColor="Black"></Label>
+                <StackLayout Orientation="Vertical" VerticalOptions="Center" HorizontalOptions="CenterAndExpand">
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="{Binding Tower.Level}"></Label>
+                    </StackLayout>
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="{Binding Tower.NextLevelPrice}"></Label>
+                    </StackLayout>
                 </StackLayout>
             </StackLayout>
-            <StackLayout Orientation="Vertical" VerticalOptions="Center" HorizontalOptions="EndAndExpand">
-                <StackLayout Orientation="Vertical">
-                    <Label Text="{Binding Tower.Level}"></Label>
+            <StackLayout Orientation="Horizontal" Padding="0" Margin="0" IsVisible="{Binding ShowStats}">
+                <StackLayout Orientation="Vertical" VerticalOptions="Center">
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="Damage" TextColor="Black"></Label>
+                    </StackLayout>
+                    <StackLayout Orientation="Vertical">
+                        <Label Text="Speed" TextColor="Black"></Label>
+                    </StackLayout>
                 </StackLayout>
-                <StackLayout Orientation="Vertical">
-                    <Label Text="{Binding Tower.NextLevelPrice}"></Label>
+                <StackLayout Orientation="Vertical" VerticalOptions="Center" HorizontalOptions="EndAndExpand">
+                    <StackLayout x:Name="damageLayout" Orientation="Horizontal" />
+                    <StackLayout x:Name="speedLayout" Orientation="Horizontal" />
                 </StackLayout>
             </StackLayout>
         </StackLayout>

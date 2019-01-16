@@ -10,7 +10,7 @@ namespace TowerDefense
     public partial class StatusView : ContentView
     {
         public event EventHandler StartGameEvent;
-        public event EventHandler EndGameEvent;
+        public event EventHandler<Boolean> EndGameEvent;
 
         public bool IsExpanded { get; set; } = true;
 
@@ -35,6 +35,11 @@ namespace TowerDefense
         {
             if (score.Value > 0)
                 HighScores.ScoresTable.PublishScore(score, PlayerManager.Player.Token);
+        }
+
+        public void ExpandPanel()
+        {
+            if (!IsExpanded) MovePanel();
         }
 
         private void MovePanel()
@@ -67,7 +72,7 @@ namespace TowerDefense
 
         private void GameEnd_Clicked(object sender, EventArgs e)
         {
-            EndGameEvent?.Invoke(this, null);
+            EndGameEvent?.Invoke(this, true);
         }
 
         private void OnSettings_Clicked(object sender, EventArgs e)

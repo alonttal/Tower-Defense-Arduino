@@ -39,6 +39,9 @@ namespace TowerDefense
 
             statusView.StartGameEvent += StartGameEventHandler;
             statusView.EndGameEvent += EndGameEventHandler;
+            BluetoothGameManager.EndGameEvent += EndGameEventHandler;
+
+            BluetoothGameManager.StartTracking();
 
             StackLayout mainLayout = new StackLayout();
             mainLayout.Spacing = 0;
@@ -69,14 +72,13 @@ namespace TowerDefense
             GameStats.IsGameStarted = true;
         }
 
-        public void EndGameEventHandler(object sender, EventArgs e)
+        public void EndGameEventHandler(object sender, Boolean sendEndGame)
         {
             System.Diagnostics.Debug.WriteLine("Ending game.");
-            BluetoothGameManager.SendEndGame();
+            if (sendEndGame) BluetoothGameManager.SendEndGame();
             statusView.UpdateTableScore(new HighScore { Name = Player.Name, Value = GameStats.Score, Date = DateTime.Now });
             GameStats.IsGameStarted = false;
+            statusView.ExpandPanel();
         }
-
-
     }
 }

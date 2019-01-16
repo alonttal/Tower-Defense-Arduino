@@ -8,6 +8,7 @@ namespace TowerDefense.Managers
 {
     class BluetoothGameManager
     {
+        public event EventHandler<Boolean> EndGameEvent;
         private BluetoothService _bluetoothService;
         private GameStats _gameStats;
         private bool _isTracking = false;
@@ -19,7 +20,7 @@ namespace TowerDefense.Managers
             this._gameStats = gameStats;
         }
 
-        private void StartTracking()
+        public void StartTracking()
         {
             _isTracking = true;
             _task = Task.Run(() =>
@@ -27,15 +28,17 @@ namespace TowerDefense.Managers
                 while (_isTracking)
                 {
                     string strMessage = _bluetoothService.Bluetooth.Read();
-                    if (strMessage != null && int.TryParse(strMessage, out int deltaScore))
+                    if (strMessage != null && int.TryParse(strMessage, out int score))
                     {
+                        int deltaScore = score - _gameStats.Score;
                         _gameStats.Score += deltaScore;
 
                         _gameStats.AtomicIncrementCoins(deltaScore);
                     }
-                    else if (strMessage != null && strMessage.Equals("e"))
+                    else if (strMessage != null && strMessage.Equals("e") && _isTracking)
                     {
-                        StopTracking();
+                        //StopTracking();
+                        EndGameEvent?.Invoke(this, false);
                     }
                 }
                 System.Diagnostics.Debug.Print("Score Tracking Ended");
@@ -49,14 +52,14 @@ namespace TowerDefense.Managers
 
         public void SendStartGame()
         {
-            StartTracking();
+            //StartTracking();
             _bluetoothService.Bluetooth.Write("s");
         }
         public void SendEndGame()
         {
-            StopTracking();
+            //StopTracking();
             _bluetoothService.Bluetooth.Write("e");
-            _task.Wait(5000);
+            _task.Wait(1000);
         }
     }
 }

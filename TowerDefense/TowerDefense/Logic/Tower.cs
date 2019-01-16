@@ -46,6 +46,8 @@ namespace TowerDefense
 
             }
         }
+        public int Damage { get; set; } = 1;
+        public int Speed { get; set; } = 1;
 
         public void LevelUp()
         {

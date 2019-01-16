@@ -19,7 +19,7 @@
                             <Image Source="connect_icon" VerticalOptions="CenterAndExpand" />
                             <Label Text="Connect" VerticalOptions="CenterAndExpand" FontSize="15" FontAttributes="Bold" />
                         </StackLayout>
-                        <Label Text="What is your name my lord?" />
+                        <Label Text="What is your name my soldier?" />
                         <Entry x:Name="LoginNameEntry" Placeholder="Name" />
                         <Label Text="Do you have your secret password? I promise to not tell anyone" />
                         <Entry x:Name="LoginPasswordEntry" Placeholder="Password" IsPassword="true" />
@@ -40,7 +40,7 @@
                             <Image Source="regiter_icon.png" VerticalOptions="CenterAndExpand" />
                             <Label Text="Register" FontSize="15" FontAttributes="Bold" VerticalOptions="CenterAndExpand" />
                         </StackLayout>
-                        <Label Text="Please tell me your name my lord" />
+                        <Label Text="Tell me your name soldier" />
                         <Label Text="Name cannot be longer than 10 characters" Margin="0" FontSize="8"/>
                         <Entry x:Name="RegisterNameEntry" Placeholder="Name" />
                         <Label Text="I will also need a secret password for that" />
@@ -63,7 +63,7 @@
                 </StackLayout>
             </StackLayout>
             <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Spacing="0">
-                <Image Source="orc.png" />
+                <Image Source="grenade.png" />
             </StackLayout>
         </StackLayout>
     </ScrollView>
